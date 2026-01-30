@@ -1,0 +1,10 @@
+pointcloud:
+  enabled: true
+  processing_type: "idp3" # Options: dp3, idp3
+  num_points: 4096
+  near: 0.1
+  far: 2.0
+
+images:
+  enabled: true
+  resize: [84, 84]

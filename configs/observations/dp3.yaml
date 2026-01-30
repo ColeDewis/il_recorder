@@ -1,0 +1,11 @@
+pointcloud:
+  enabled: true
+  processing_type: "dp3" # Options: dp3, idp3
+  num_points: 1024
+  # Workspace bounds [x_min, x_max], [y_min, y_max], [z_min, z_max]
+  workspace: [[-0.5, 0.5], [-0.8, 0.0], [0.0, 1.0]]
+  # Extrinsics modification (if needed during recording)
+  rpy: [0, 0, 0] 
+
+images:
+  enabled: false

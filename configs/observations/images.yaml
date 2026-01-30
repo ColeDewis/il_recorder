@@ -1,0 +1,6 @@
+pointcloud:
+  enabled: false
+
+images:
+  enabled: true
+  resize: [84, 84]

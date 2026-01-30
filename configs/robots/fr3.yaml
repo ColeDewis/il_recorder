@@ -1,0 +1,9 @@
+robot_name: "fr3"
+active_subscribers:
+  - {key: "joints", topic: "fr3/joint_states", type: "sensor_msgs/msg/JointState"}
+  - {key: "cartesian", topic: "fr3/end_effector_pose", type: "geometry_msgs/msg/PoseStamped"}
+  - {key: "gripper", topic: "fr3/gripper_state", type: "franky_msgs/msg/GripperState"}
+  - {key: "image", topic: "/camera1/color/image_raw", type: "sensor_msgs/msg/Image"}
+  - {key: "pointcloud", topic: "/camera1/depth/color/points", type: "sensor_msgs/msg/PointCloud2"}
+params:
+  example: 1

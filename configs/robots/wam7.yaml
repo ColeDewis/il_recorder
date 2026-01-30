@@ -1,0 +1,11 @@
+robot_name: "wam"
+active_subscribers:
+  - {key: "joints", topic: "/joint_states", type: "sensor_msgs/msg/JointState"}
+  - {key: "joint_vels", topic: "/wam/jointVelocity", type: "sensor_msgs/msg/JointState"}
+  - {key: "cartesian", topic: "/wam/ToolPose", type: "geometry_msgs/msg/PoseStamped"}
+  - {key: "cartesian_vels", topic: "/wam/toolVelocity", type: "geometry_msgs/msg/TwistStamped"}
+  - {key: "image", topic: "/camera1/color/image_raw", type: "sensor_msgs/msg/Image"}
+  - {key: "pointcloud", topic: "/camera1/depth/color/points", type: "sensor_msgs/msg/PointCloud2"}
+params:
+  has_gripper: false
+  dof: 7
