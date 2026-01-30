@@ -4,6 +4,11 @@ A general purpose data recorder for imitation learning with ROS2.
 
 Designed to allow use across multiple robots, with the only requirement needed being to specify a robot config file and adapter to handle the data types used on that robot.
 
+## TODOs
+
+- Check for concurrency issues related to starting/stopping recording, saving data
+- Test DP3, image recording in more detail
+
 # Install
 
 Simply clone this package into your ros2 workspace, and build with the standard `colcon build --symlink-install --packages-select il_recorder`.
@@ -133,8 +138,6 @@ Currently, only DP3 (crop + farthest point sample) and iDP3 (voxel downsample + 
 Similarly, for images, only resizing is currently available. 
 
 For other processing, either modify the code, or save without processing and then run your postprocessing later.
-
-## Point Clouds
 
 ```yaml
 pointcloud:
