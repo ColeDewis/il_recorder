@@ -21,7 +21,7 @@ def generate_launch_description():
             # Observation Config: looks in configs/observations/<name>.yaml
             DeclareLaunchArgument(
                 "obs",
-                default_value="idp3.yaml",
+                default_value="all.yaml",
                 description="Name of the observation config file (with .yaml) in configs/observations/",
             ),
             DeclareLaunchArgument("save_dir", default_value="data"),

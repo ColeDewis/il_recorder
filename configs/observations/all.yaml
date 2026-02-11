@@ -3,7 +3,7 @@ pointcloud:
   processing_type: "idp3" # Options: dp3, idp3
   num_points: 4096
   near: 0.1
-  far: 2.0
+  far: 1.7
 
 images:
   enabled: true

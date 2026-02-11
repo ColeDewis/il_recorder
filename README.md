@@ -44,7 +44,7 @@ The recorder listens to the /joy topic (standard Gamepad messages).
 
 - Stop & Save: Button 7 (Start/Options) (while recording). Stops recording, drains the processing queue, and saves to disk.
 
-- Cancel/Discard: Button 8 (Select/Share). Stops recording immediately and discards all buffered frames.
+- Cancel/Discard: Button 6 (Select/Share). Stops recording immediately and discards all buffered frames.
 
 ## Debugging Pointclouds
 

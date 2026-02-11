@@ -15,6 +15,9 @@ from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from rclpy.qos import qos_profile_sensor_data
 from sensor_msgs.msg import Joy
+from wam_srvs.srv import JointMove
+from sensor_msgs.msg import JointState
+from std_srvs.srv import Trigger
 
 # Custom Imports
 from .adapters import ADAPTERS
@@ -148,7 +151,6 @@ class ILRecorder(Node):
             if n.startswith("episode_") and n.endswith(".h5")
         ]
         self.episode_num = max(existing) + 1 if existing else 0
-
         self.get_logger().info(f"Recorder Online. Robot: {self.robot_name}")
 
     def status_callback(self):
@@ -181,6 +183,10 @@ class ILRecorder(Node):
             # We fetch with NoWait so we don't block the Timer thread idly
             msg_dict = self.raw_queue.get_nowait()
         except queue.Empty:
+            return
+
+        # dont process unecessarily
+        if not self.is_recording:
             return
 
         try:
@@ -231,7 +237,7 @@ class ILRecorder(Node):
 
             self.processed_buffer.append(frame_data)
 
-            self.get_logger().info("")
+            self.get_logger().info(str(len(self.processed_buffer)))
 
         except Exception as e:
             self.get_logger().error(f"Processing Error: {e}")
@@ -240,11 +246,12 @@ class ILRecorder(Node):
 
     def joy_callback(self, msg: Joy):
         """CONTROL: Runs in Reentrant Group"""
-        if time.time() - self.last_joy_time < 0.5:
+        if time.time() - self.last_joy_time < 1.0:
             return
 
         # Start (Button 7)
         if msg.buttons[7]:
+            self.last_joy_time = time.time()
             if not self.is_recording:
                 self.get_logger().info(f"REC >>> Start Ep {self.episode_num}")
                 self.processed_buffer = []
@@ -254,16 +261,15 @@ class ILRecorder(Node):
             else:
                 self.is_recording = False
                 self.save_episode_hdf5()
-            self.last_joy_time = time.time()
 
-        # Cancel (Button 8)
-        elif msg.buttons[8]:
+        # Cancel (Button 6)
+        elif msg.buttons[6]:
+            self.last_joy_time = time.time()
             self.get_logger().warn("Cancelled - Buffer Discarded")
             self.is_recording = False
             self.processed_buffer = []
             with self.raw_queue.mutex:
                 self.raw_queue.queue.clear()
-            self.last_joy_time = time.time()
 
     def save_episode_hdf5(self):
         self.get_logger().info("Recording Stopped. Draining queue...")
