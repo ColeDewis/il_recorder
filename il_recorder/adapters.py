@@ -16,6 +16,7 @@ any more data than you require.
 
 # This block is ONLY seen by VSCode/Type Checkers.
 if TYPE_CHECKING:
+    from franky_msgs.msg import CorrectionInfo
     from geometry_msgs.msg import PoseStamped, TwistStamped
     from sensor_msgs.msg import JointState
 
@@ -28,6 +29,15 @@ class RobotMsgDict(TypedDict):
     joint_vels: "JointState"
     cartesian: "PoseStamped"
     cartesian_vels: "TwistStamped"
+    gripper: Any
+
+
+class RobotMsgDictTakeover(TypedDict):
+    joints: "JointState"
+    joint_vels: "JointState"
+    cartesian: "PoseStamped"
+    cartesian_vels: "TwistStamped"
+    takeover: "CorrectionInfo"
     gripper: Any
 
 
@@ -65,6 +75,45 @@ def parse_fr3(msg_dict: RobotMsgDict, params: Dict[str, Any]):
             # TODO no velocity since I have to add it in franky bridge.
         },
         "gripper": np.array([gripper_msg.width]),
+    }
+
+
+def parse_fr3_takeover(msg_dict: RobotMsgDictTakeover, params: Dict[str, Any]):
+
+    joint_msg = msg_dict["joints"]
+    cart_msg = msg_dict["cartesian"]
+    gripper_msg = msg_dict["gripper"]
+    takeover_msg = msg_dict["takeover"]
+
+    rpy = Rotation.from_quat(
+        [
+            cart_msg.pose.orientation.x,
+            cart_msg.pose.orientation.y,
+            cart_msg.pose.orientation.z,
+            cart_msg.pose.orientation.w,
+        ]
+    ).as_euler("xyz")
+
+    return {
+        "joints": {
+            "position": np.array(joint_msg.position),
+            "velocity": np.array(joint_msg.velocity),
+        },
+        "cartesian": {
+            "position": np.array(
+                [
+                    cart_msg.pose.position.x,
+                    cart_msg.pose.position.y,
+                    cart_msg.pose.position.z,
+                    rpy[0],
+                    rpy[1],
+                    rpy[2],
+                ]
+            )
+            # TODO no velocity since I have to add it in franky bridge.
+        },
+        "gripper": np.array([gripper_msg.width]),
+        "takeover": np.array([takeover_msg.human_takeover]),
     }
 
 
@@ -122,4 +171,4 @@ def parse_wam(msg_dict: RobotMsgDict, params: Dict[str, Any]):
     return data
 
 
-ADAPTERS = {"fr3": parse_fr3, "wam": parse_wam}
+ADAPTERS = {"fr3": parse_fr3, "fr3_takeover": parse_fr3_takeover, "wam": parse_wam}

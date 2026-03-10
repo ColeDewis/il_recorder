@@ -31,7 +31,7 @@ class PCCheck(Node):
         pkg_name = "il_recorder"
         share_dir = get_package_share_directory(pkg_name)
 
-        self.declare_parameter("robot_config", "wam7.yaml")
+        self.declare_parameter("robot_config", "fr3.yaml")
         self.declare_parameter("obs_config", "idp3.yaml")
 
         robot_filename = self.get_parameter("robot_config").value

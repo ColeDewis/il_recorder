@@ -14,9 +14,8 @@ from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallb
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from rclpy.qos import qos_profile_sensor_data
-from sensor_msgs.msg import Joy
-from wam_srvs.srv import JointMove
-from sensor_msgs.msg import JointState
+from sensor_msgs.msg import JointState, Joy
+from std_msgs.msg import Bool
 from std_srvs.srv import Trigger
 
 # Custom Imports
@@ -143,6 +142,9 @@ class ILRecorder(Node):
         )
         self.last_joy_time = time.time()
 
+        # publisher if we are recording or not
+        self.pub_is_recording = self.create_publisher(Bool, "is_recording", 10)
+
         # IO Setup
         os.makedirs(self.base_path, exist_ok=True)
         existing = [
@@ -165,10 +167,13 @@ class ILRecorder(Node):
                 )
 
     def unified_callback(self, *msgs):
+        self.get_logger().debug(f"Received synced msgs for keys: {self.sub_keys}")
         """PRODUCER: Runs a synced callback for all subscribed msgs, and adds to queue."""
         if not self.stream_ready:
             self.get_logger().info(">>> All topics found - Recording is ready! <<<")
             self.stream_ready = True
+
+        self.pub_is_recording.publish(Bool(data=self.is_recording))
 
         if not self.is_recording:
             return
@@ -198,7 +203,17 @@ class ILRecorder(Node):
             # 2. Images
             for key in self.image_keys:
                 if key in msg_dict:
-                    cv_img = self.cv_bridge.imgmsg_to_cv2(msg_dict[key], "bgr8")
+                    # cv_img = self.cv_bridge.imgmsg_to_cv2(msg_dict[key], "bgr8")
+                    img_1d = np.frombuffer(msg_dict[key].data, dtype=np.uint8).copy()
+
+                    # 3. Reshape based on message metadata
+                    cv_img = img_1d.reshape(
+                        (msg_dict[key].height, msg_dict[key].width, 3)
+                    )
+
+                    # 4. If your camera natively publishes in RGB, but OpenCV wants BGR
+                    if "rgb" in msg_dict[key].encoding.lower():
+                        cv_img = cv2.cvtColor(cv_img, cv2.COLOR_RGB2BGR)
 
                     img_cfg = self.obs_cfg["images"]
                     resize_dim = img_cfg.get("resize")  # e.g., [224, 224]
@@ -239,7 +254,7 @@ class ILRecorder(Node):
 
             self.get_logger().info(str(len(self.processed_buffer)))
 
-        except Exception as e:
+        except KeyboardInterrupt as e:
             self.get_logger().error(f"Processing Error: {e}")
         finally:
             self.raw_queue.task_done()

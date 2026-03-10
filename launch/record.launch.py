@@ -15,7 +15,7 @@ def generate_launch_description():
             # Robot Config: looks in configs/robots/<name>.yaml
             DeclareLaunchArgument(
                 "robot",
-                default_value="wam7.yaml",
+                default_value="fr3_takeover.yaml",
                 description="Name of the robot config file (with .yaml) in configs/robots/",
             ),
             # Observation Config: looks in configs/observations/<name>.yaml
